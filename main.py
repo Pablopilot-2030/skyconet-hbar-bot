@@ -55,3 +55,12 @@ def get_balance():
 
 def place_order(side, usdt_amount):
     price_resp = requests.get(f"{BASE_URL}/v5/market/tickers?category=spot&symbol={SYMBOL}")
+    price_data = price_resp.json()
+    price = float(price_data["result"]["list"][0]["lastPrice"])
+    qty = round(usdt_amount / price, 0)
+    body = {
+        "category": "spot",
+        "symbol": SYMBOL,
+        "side": side,
+        "orderType": "Market",
+        "q
