@@ -8,17 +8,20 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-BYBIT_API_KEY = os.environ.get("BYBIT_API_KEY", "")
+BYBIT_API_KEY    = os.environ.get("BYBIT_API_KEY", "")
 BYBIT_API_SECRET = os.environ.get("BYBIT_API_SECRET", "")
-WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "SKYCONET_HBAR_2024")
-
-BYBIT_BASE_URL = "https://api.bybit.com"
-SYMBOL = "HBARUSDT"
-ORDER_QTY = "100"
+WEBHOOK_SECRET   = os.environ.get("WEBHOOK_SECRET", "SKYCONET_HBAR_2024")
+BYBIT_BASE_URL   = "https://api.bybit.com"
+SYMBOL           = "HBARUSDT"
+ORDER_QTY        = "100"
 
 @app.route("/", methods=["GET"])
 def index():
     return jsonify({"status": "SKYCONET HBAR Bot online"}), 200
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "bot": "SKYCONET HBAR"}), 200
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -53,11 +56,11 @@ def place_order(side, qty):
         hashlib.sha256
     ).hexdigest()
     headers = {
-        "X-BAPI-API-KEY": BYBIT_API_KEY,
-        "X-BAPI-SIGN": signature,
-        "X-BAPI-TIMESTAMP": timestamp,
-        "X-BAPI-RECV-WINDOW": recv_window,
-        "Content-Type": "application/json",
+        "X-BAPI-API-KEY":      BYBIT_API_KEY,
+        "X-BAPI-SIGN":         signature,
+        "X-BAPI-TIMESTAMP":    timestamp,
+        "X-BAPI-RECV-WINDOW":  recv_window,
+        "Content-Type":        "application/json",
     }
     try:
         resp = requests.post(
@@ -68,12 +71,12 @@ def place_order(side, qty):
         )
         resp_json = resp.json()
         return {
-            "order_side": side,
-            "symbol": SYMBOL,
-            "qty": qty,
+            "order_side":    side,
+            "symbol":        SYMBOL,
+            "qty":           qty,
             "bybit_retCode": resp_json.get("retCode"),
-            "bybit_retMsg": resp_json.get("retMsg"),
-            "orderId": resp_json.get("result", {}).get("orderId", ""),
+            "bybit_retMsg":  resp_json.get("retMsg"),
+            "orderId":       resp_json.get("result", {}).get("orderId", ""),
         }
     except Exception as e:
         return {"error": str(e)}
